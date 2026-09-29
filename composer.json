@@ -1,0 +1,54 @@
+{
+    "name": "dominion-solutions/filament-seo",
+    "description": "Clean page titles, unique meta descriptions, and Open Graph/Twitter tags for Laravel + Filament, managed from the Filament admin panel.",
+    "keywords": [
+        "filament",
+        "laravel",
+        "meta",
+        "open-graph",
+        "seo"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dominion Solutions LLC",
+            "email": "mark.horninger@dominion.solutions"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "filament/filament": "^4.0|^5.0",
+        "illuminate/contracts": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "livewire/livewire": "^3.0|^4.0"
+    },
+    "require-dev": {
+        "league/commonmark": "^2.0",
+        "phpunit/phpunit": "^11.0|^12.0"
+    },
+    "suggest": {
+        "league/commonmark": "Required for Text::fromMarkdown(), which strips Markdown syntax from generated meta descriptions."
+    },
+    "autoload": {
+        "psr-4": {
+            "DominionSolutions\\FilamentSeo\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DominionSolutions\\FilamentSeo\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DominionSolutions\\FilamentSeo\\FilamentSeoServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
