@@ -18,7 +18,7 @@ It is a **library**, not an application. There is no `app/`, no routes file, and
 composer install
 ```
 
-PHP 8.3+. The test suite runs on [Testbench](https://packages.tools/testbench), so there is no
+PHP 8.2+. The test suite runs on [Testbench](https://packages.tools/testbench), so there is no
 database to set up and no `.env` to write. If a test needs a table, add a migration under
 `tests/database/` and load it from `tests/TestCase.php`.
 

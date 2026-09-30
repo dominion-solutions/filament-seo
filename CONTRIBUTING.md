@@ -11,7 +11,7 @@ cd filament-seo
 composer install
 ```
 
-You need PHP 8.3+ and a JDK if you are going to touch the diagrams — the renderer shells out to
+You need PHP 8.2+ and a JDK if you are going to touch the diagrams — the renderer shells out to
 PlantUML.
 
 ## Before you push

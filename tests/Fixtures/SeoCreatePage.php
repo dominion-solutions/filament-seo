@@ -12,9 +12,10 @@ use Filament\Resources\Pages\CreateRecord;
  * actually used, including that its `handleRecordCreation()` override stays
  * signature-compatible with Filament's.
  *
- * @template TModel of \Illuminate\Database\Eloquent\Model
- *
- * @extends CreateRecord<TModel>
+ * Filament's resource pages are only generic from 5.4 onwards, so an
+ * `@extends CreateRecord<...>` type argument would be invalid for 5.0-5.3, which
+ * this package supports. PHPStan 2 does not require one, and the trait only ever
+ * sees a `Model`.
  */
 class SeoCreatePage extends CreateRecord
 {

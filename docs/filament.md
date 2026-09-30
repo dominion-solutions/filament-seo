@@ -165,24 +165,9 @@ public static function form(Schema $schema): Schema
 }
 ```
 
-That is the Filament 5 resource API. On Filament 4, resources use `Filament\Forms\Form` and
-`schema()` instead:
-
-```php
-use DominionSolutions\FilamentSeo\Schemas\SeoSchema;
-use Filament\Forms\Form;
-
-public static function form(Form $form): Form
-{
-    return $form->schema([
-        // ...your own fields
-        SeoSchema::make(),
-    ]);
-}
-```
-
-It is `final`, by design — extending it would tie this package to a Filament version. Compose it
-alongside your fields, or build your own section from the individual field helpers
+It is `final`, by design — a resource form is not an extension point, and subclassing it would tie
+you to whichever release declared the subclass. Compose it alongside your fields, or build your own
+section from the individual field helpers
 (`SeoSchema::titleField()`, `::robotsField()`, and so on) if you want a different layout.
 
 You can also control the section itself:

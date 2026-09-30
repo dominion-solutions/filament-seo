@@ -24,3 +24,9 @@ parameters:
     # ready to fix what surfaces — level 9 is the mixed-type check, and it wants
     # a typed `SeoData::make()`.
     level: 7
+
+    # The package claims Filament 5's floor, which is PHP 8.2. Analysing as 8.2
+    # is what keeps that claim honest on a machine that only has a newer PHP
+    # installed: an 8.3-only function or syntax in src/ becomes an error here
+    # rather than a surprise in the CI matrix.
+    phpVersion: 80200

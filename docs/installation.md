@@ -2,10 +2,14 @@
 
 ## Requirements
 
-- PHP 8.3 or higher
-- Laravel 11, 12 or 13
-- Filament 4.9 or 5
-- Livewire 3 or 4
+- PHP 8.2 or higher
+- Laravel 11.28, 12 or 13
+- Filament 5
+- Livewire 4.4 or higher
+- Tailwind CSS 4.1 or higher (Filament's own requirement)
+
+These are the same floors Filament 5 declares, so there is nothing to reconcile: whatever Filament 5
+accepts, this package accepts.
 
 ## Install the package
 

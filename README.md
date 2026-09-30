@@ -20,10 +20,11 @@ Every indexable page gets its own title and meta description — authored in the
 
 | | |
 |---|---|
-| PHP | 8.3+ |
-| Laravel | 11, 12 or 13 |
-| Filament | 4.9+ or 5 |
-| Livewire | 3 or 4 |
+| PHP | 8.2+ |
+| Laravel | 11.28, 12 or 13 |
+| Filament | 5 |
+| Livewire | 4.4+ |
+| Tailwind CSS | 4.1+ (Filament's requirement) |
 
 ## Installation
 
@@ -125,8 +126,8 @@ public static function form(Schema $schema): Schema
 }
 ```
 
-That signature is for Filament 5. Filament 4 uses `Filament\Forms\Form` and
-`$form->schema([...])`; see the [Filament guide](docs/filament.md#the-schema) for both versions.
+That is the current Filament resource API; see the [Filament guide](docs/filament.md#the-schema)
+for the surrounding form, and for what the plugin does on a panel with no resource.
 
 Then hook persistence into the create and edit pages:
 
