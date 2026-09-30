@@ -36,6 +36,14 @@ class Seo extends Model
         'type',
     ];
 
+    /**
+     * The record this metadata belongs to.
+     *
+     * Typed as `Model` because the owner is whatever the morph points at —
+     * there is no single related class to name here.
+     *
+     * @return MorphTo<Model, $this>
+     */
     public function seoable(): MorphTo
     {
         return $this->morphTo();

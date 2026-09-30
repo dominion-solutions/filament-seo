@@ -1,0 +1,26 @@
+# Static analysis configuration for Dominion Solutions Filament SEO.
+#
+# Run locally with `composer analyse`, and in CI as the "Larastan" jobs, which
+# run against both the lowest and the highest dependency set.
+# See CONTRIBUTING.md#types-and-static-analysis for the reasoning behind the level.
+
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - src
+        - config
+        - database
+        # The fixtures in tests/ are the classes a host application would
+        # write. Analysing them is what gives the traits in src/Concerns real
+        # coverage: without a class in this repository that `use`s them, PHPStan
+        # reports every trait as unused and analyses none of their bodies.
+        - tests
+
+    # Level 7. Level 8 passes as well; 7 is enforced because its extra checks are
+    # the ones that catch real defects without leaning on third-party stub
+    # details that shift between framework releases. Raise it when you are
+    # ready to fix what surfaces — level 9 is the mixed-type check, and it wants
+    # a typed `SeoData::make()`.
+    level: 7

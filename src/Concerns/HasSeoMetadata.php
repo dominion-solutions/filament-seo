@@ -77,7 +77,7 @@ trait HasSeoMetadata
     public function getSeoData(): SeoData
     {
         return new SeoData(
-            title: (string) $this->getSeoTitle(),
+            title: $this->flattenSeoText($this->getSeoTitle()),
             description: $this->getSeoDescription(),
             imageUrl: $this->getSeoImageUrl(),
             imageAlt: $this->getSeoImageAlt(),
@@ -85,6 +85,18 @@ trait HasSeoMetadata
             robots: $this->getSeoRobots(),
             type: $this->getSeoType(),
         );
+    }
+
+    /**
+     * Flatten a page title to plain text.
+     *
+     * `getTitle()` may hand back an `Htmlable`, which cannot be cast to string
+     * — doing so raises a fatal error rather than producing markup — so unwrap
+     * it explicitly before it reaches the metadata.
+     */
+    protected function flattenSeoText(string|Htmlable $value): string
+    {
+        return $value instanceof Htmlable ? $value->toHtml() : $value;
     }
 
     /**

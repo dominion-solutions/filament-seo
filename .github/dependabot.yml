@@ -1,0 +1,94 @@
+# Dependabot
+#
+# Keeps the package installable against current Laravel, Filament and PHP, and
+# keeps the workflows themselves current. A package like this ages badly if
+# nobody notices that its constraints have drifted away from what people are
+# actually running.
+#
+# Groups are used so that a routine Laravel or Filament bump arrives as one
+# pull request rather than a dozen. A bump that crosses a major version is
+# deliberately left ungrouped: those need reading, and burying one inside a
+# twelve-package group is how it slips through.
+
+version: 2
+
+updates:
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Europe/London
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    labels:
+      - dependencies
+      - composer
+    commit-message:
+      prefix: 'chore(deps)'
+    groups:
+      laravel:
+        patterns:
+          - 'laravel/*'
+          - 'illuminate/*'
+          - 'orchestra/*'
+        update-types:
+          - minor
+          - patch
+      filament:
+        patterns:
+          - 'filament/*'
+        update-types:
+          - minor
+          - patch
+      livewire:
+        patterns:
+          - 'livewire/*'
+        update-types:
+          - minor
+          - patch
+      quality-tools:
+        patterns:
+          - 'larastan/*'
+          - 'phpstan/*'
+          - 'laravel/pint'
+        update-types:
+          - minor
+          - patch
+      dev-tooling:
+        patterns:
+          - '*'
+        exclude-patterns:
+          - 'laravel/*'
+          - 'illuminate/*'
+          - 'orchestra/*'
+          - 'filament/*'
+          - 'livewire/*'
+          - 'larastan/*'
+          - 'phpstan/*'
+          - 'laravel/pint'
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Europe/London
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: 'chore(ci)'
+    groups:
+      actions:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch

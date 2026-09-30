@@ -1,0 +1,66 @@
+@startuml
+' How a page's metadata ends up in the document head.
+'
+' The detail worth noticing: Filament renders its <head> render hooks outside
+' the Livewire component's own scope, so the page cannot simply be asked for its
+' metadata at that point. The page publishes it from a Livewire lifecycle hook
+' instead, and the render hook reads it back from the registry.
+
+title How metadata reaches the document head
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #475569
+  LifeLineBorderColor #94a3b8
+  LifeLineBackgroundColor #f8fafc
+  ParticipantBorderColor #475569
+  ParticipantBackgroundColor #ffffff
+  ActorBorderColor #475569
+  ActorBackgroundColor #ffffff
+}
+autonumber
+
+actor Visitor
+participant "Filament" as Filament
+participant "About\n(Page + HasSeoMetadata)" as Page
+participant "SeoRegistry\n(scoped binding)" as Registry
+participant "FilamentSeoPlugin" as Plugin
+participant "MetaTags" as MetaTags
+
+Visitor -> Filament : GET /about
+activate Filament
+
+Filament -> Page : mount, then boot Livewire
+activate Page
+
+Page -> Page : bootedHasSeoMetadata()
+Page -> Page : getSeoData()
+note right of Page
+  Reads the page's own
+  seoTitle / seoDescription
+  properties, and falls back to
+  the record's getSeoData()
+  when the page renders one.
+end note
+Page -> Registry : set(SeoData)
+deactivate Page
+
+Filament -> Plugin : HEAD_END render hook
+activate Plugin
+
+Plugin -> Registry : get()
+Registry --> Plugin : SeoData, or null
+deactivate Registry
+
+Plugin -> Plugin : page data ?? panel data
+Plugin -> Plugin : layer site name and canonical underneath
+Plugin -> MetaTags : render(SeoData, withTitle)
+MetaTags --> Plugin : description, robots, canonical,\nog:*, twitter:*
+Plugin --> Filament : markup
+deactivate Plugin
+
+Filament --> Visitor : the document head
+deactivate Filament
+
+@enduml

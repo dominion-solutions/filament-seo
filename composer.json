@@ -15,15 +15,23 @@
             "email": "mark.horninger@dominion.solutions"
         }
     ],
+    "support": {
+        "issues": "https://github.com/dominion-solutions/filament-seo/issues",
+        "source": "https://github.com/dominion-solutions/filament-seo",
+        "docs": "https://github.com/dominion-solutions/filament-seo/tree/main/docs"
+    },
     "require": {
         "php": "^8.3",
-        "filament/filament": "^4.0|^5.0",
+        "filament/filament": "^4.9|^5.0",
         "illuminate/contracts": "^11.0|^12.0|^13.0",
         "illuminate/support": "^11.0|^12.0|^13.0",
         "livewire/livewire": "^3.0|^4.0"
     },
     "require-dev": {
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.24",
         "league/commonmark": "^2.0",
+        "orchestra/testbench": "^9.2|^10.0|^11.0",
         "phpunit/phpunit": "^11.0|^12.0"
     },
     "suggest": {
@@ -48,6 +56,30 @@
     },
     "config": {
         "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse --memory-limit=1G",
+        "lint": "pint --test",
+        "fix": "pint",
+        "diagrams": "bash bin/render-diagrams.sh",
+        "diagrams-check": "bash bin/render-diagrams.sh --check",
+        "docs": "php bin/check-doc-links.php",
+        "check": [
+            "@lint",
+            "@analyse",
+            "@test"
+        ]
+    },
+    "scripts-descriptions": {
+        "test": "Run the PHPUnit test suite",
+        "analyse": "Run Larastan static analysis",
+        "lint": "Check code style with Pint without changing anything",
+        "fix": "Fix code style with Pint",
+        "diagrams": "Re-render the PlantUML diagrams in docs/ to PNG",
+        "diagrams-check": "Check that committed diagram PNGs match their PlantUML sources",
+        "docs": "Check that relative Markdown links resolve",
+        "check": "Run the full local gate: style, static analysis, then tests"
     },
     "minimum-stability": "stable",
     "prefer-stable": true

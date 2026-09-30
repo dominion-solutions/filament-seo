@@ -10,6 +10,8 @@ class FilamentSeoServiceProvider extends ServiceProvider
      * The package ships its migrations in place so `php artisan migrate` just
      * works. Publishing is available for teams that prefer migrations to live
      * in the application.
+     *
+     * @return array<string, string>
      */
     protected function publishables(): array
     {

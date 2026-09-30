@@ -1,9 +1,20 @@
 /vendor
 /node_modules
 
-composer.lock
+# A library does not ship a lock file. CI resolves lowest and highest instead.
+/composer.lock
+
 .phpunit.cache
 .phpunit.result.cache
+.phpstan.cache
+.phpstan.neon
+
+# Cached PlantUML jar used by bin/render-diagrams.sh.
+/.build
+
+# Local agent tooling state, not part of the package.
+/.opencode
+/.logs
 
 .DS_Store
 Thumbs.db

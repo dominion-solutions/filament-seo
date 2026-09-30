@@ -1,0 +1,53 @@
+@startuml
+' The two ways an editor's input reaches the database.
+'
+' They are different pipelines: a resource page owns the record's lifecycle, so
+' the package hooks into the save. A modal action does not own it, so the host
+' lifts the seo array out before the record is written and applies it after.
+
+title Two ways to author metadata
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam activity {
+  BackgroundColor #ffffff
+  BorderColor #475569
+  DiamondBackgroundColor #f8fafc
+}
+
+start
+
+:Editor submits the form;
+
+if (Is this a resource page?) then (yes)
+
+    partition "Create / Edit page" {
+        :Hydrate the seo fields on fill;
+        :Strip the seo array from the data;
+        :Save the record;
+        :saveSeo() writes the related row;
+    }
+
+else (no)
+
+    partition "Modal action or relation manager" {
+        :captureSeoFormData() via mutateDataUsing();
+        :Strip the seo array from the data;
+        :The action creates or updates the record;
+        :applyPendingSeoFormData() via after();
+        :saveSeo() writes the related row;
+    }
+
+endif
+
+stop
+
+note left
+  Both routes end in the same place:
+  __saveSeo()__, which creates the row on
+  first save and updates it in place after
+  that. The seo array never reaches the
+  model's own attributes.
+end note
+
+@enduml

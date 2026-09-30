@@ -33,6 +33,8 @@ class FilamentSeoPlugin implements Plugin
      * Metadata for the whole panel, used when the current page does not
      * provide its own. Accepts a `SeoData`, an array of its arguments, or a
      * closure returning either.
+     *
+     * @var SeoData|array<string, mixed>|Closure(): (SeoData|array<string, mixed>)|null
      */
     protected SeoData|array|Closure|null $seoData = null;
 
@@ -88,20 +90,39 @@ class FilamentSeoPlugin implements Plugin
 
     /**
      * Work out the metadata for the page currently being rendered.
+     *
+     * The page wins. A page that publishes its own metadata is described by
+     * that metadata; the panel-wide value is the default for pages that publish
+     * nothing, so per-page titles and descriptions are never overridden by a
+     * panel-level default.
+     *
+     * The site name and the canonical fallback are applied underneath
+     * everything else, so they only ever fill a gap: a page that names its own
+     * site or canonical keeps it.
      */
     protected function resolveSeoData(): SeoData
     {
-        $data = $this->panelSeoData() ?? $this->pageSeoData() ?? new SeoData;
+        $published = $this->pageSeoData() ?? $this->panelSeoData();
 
-        $data = $data->merge([
-            'siteName' => config('filament-seo.site_name') ?? config('app.name'),
-        ]);
-
-        if (config('filament-seo.canonical_fallback', true)) {
-            $data = $data->merge(['canonicalUrl' => url()->current()]);
+        if ($published === null) {
+            return $this->fallbackSeoData();
         }
 
-        return $data;
+        return $this->fallbackSeoData()->merge($published->toArray());
+    }
+
+    /**
+     * The metadata that applies when nothing more specific has been published.
+     *
+     * Kept in its own method so that layering a page's values on top is a
+     * single, readable step rather than a sequence of overrides.
+     */
+    protected function fallbackSeoData(): SeoData
+    {
+        return new SeoData(
+            canonicalUrl: config('filament-seo.canonical_fallback', true) ? url()->current() : null,
+            siteName: config('filament-seo.site_name') ?? config('app.name'),
+        );
     }
 
     protected function panelSeoData(): ?SeoData

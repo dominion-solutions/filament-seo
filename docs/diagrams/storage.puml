@@ -1,0 +1,84 @@
+@startuml
+' Where the authored metadata lives.
+'
+' One polymorphic table, so the package works with any model without knowing
+' anything about it. Rows are created lazily: a record that has never been
+' given metadata has no row, and behaves exactly as it did before.
+
+title Storage
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam class {
+  BackgroundColor #ffffff
+  BorderColor #475569
+  ArrowColor #475569
+}
+skinparam classAttributeIconSize 0
+
+class "seos" <<table>> {
+  --
+  + id : bigint
+  + seoable_type : string
+  + seoable_id : bigint
+  + title : string?
+  + description : text?
+  + image_url : string(2048)?
+  + image_alt : string?
+  + canonical_url : string(2048)?
+  + robots : string
+  + type : string
+  + created_at, updated_at
+}
+
+class "Seo" <<model>> {
+  --
+  + toSeoData() : SeoData
+  + seoable() : MorphTo
+}
+
+class "Product" <<your model>> {
+  --
+  + seo() : MorphOne
+  + getSeoData() : SeoData
+  + getSeoRecord() : Seo?
+  + saveSeo(array) : Seo
+}
+
+class "Article" <<your model>> {
+  --
+  + seo() : MorphOne
+}
+
+class "HasSeo" <<interface>>
+
+class "InteractsWithSeo" <<trait>>
+
+note right of seos
+  __robots__ defaults to
+  "index, follow" and __type__
+  to "website", so a row is
+  never non-indexable by
+  accident.
+
+  Both are NOT NULL; the
+  package treats them as
+  always present.
+end note
+
+note bottom of seos
+  __One row per describable record.__
+  A record with no row is not an error:
+  the model falls back to values
+  generated from its own attributes.
+end note
+
+Seo ..> seos : maps to
+InteractsWithSeo ..|> HasSeo : implements
+Product ..> InteractsWithSeo : use
+Product ..|> HasSeo : implements
+Article ..> InteractsWithSeo : use
+Seo "1" <-- "0..1" Product : seoable_id
+Seo "1" <-- "0..1" Article : seoable_id
+
+@enduml

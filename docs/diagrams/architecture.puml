@@ -1,0 +1,75 @@
+@startuml
+' Package layout and the dependency direction between layers.
+'
+' The single most important structural fact: everything that decides *what* the
+' metadata is lives in Support, and nothing in Support knows about Filament,
+' Eloquent or HTTP. That is what lets the metadata rules be unit tested without
+' booting an application.
+
+title Filament SEO — package architecture
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam rectangleBorderColor #94a3b8
+skinparam rectangleBackgroundColor #f8fafc
+skinparam componentBorderColor #475569
+skinparam componentBackgroundColor #ffffff
+skinparam arrowColor #475569
+skinparam packageStyle rectangle
+
+package "Support\n(no Filament, no Eloquent, no HTTP)" as support {
+  component "SeoData\n<<value object>>" as seodata
+  component "MetaTags\n<<renderer>>" as metatags
+  component "Text\n<<helpers>>" as text
+}
+
+package "Contracts" as contracts {
+  interface "HasSeo" as hasseo
+}
+
+package "Persistence" as persistence {
+  component "Models\\Seo" as seo
+  component "Concerns\\InteractsWithSeo" as interacts
+}
+
+package "Filament integration" as filament {
+  component "FilamentSeoPlugin" as plugin
+  component "SeoRegistry" as registry
+  component "Concerns\\HasSeoMetadata" as haseometa
+  component "Schemas\\SeoSchema" as schema
+  component "Filament\\Concerns\\*" as formconcerns
+  component "FilamentSeoServiceProvider" as provider
+}
+
+package "Host application" as host {
+  component "Your model\n(Product::class)" as model
+  component "Your panel\nPanelProvider::panel()" as panel
+  component "Your page\nAbout::class" as page
+}
+
+' Support is the foundation.
+seodata ..> text : normalises with
+metatags ..> seodata : renders
+plugin ..> metatags : renders head markup
+plugin ..> registry : reads
+plugin ..> seodata : resolves
+registry ..> seodata : holds
+haseometa ..> seodata : publishes
+haseometa ..> registry : set()
+schema ..> seodata : option values
+formconcerns ..> seodata : hydrates and saves
+formconcerns ..> interacts : delegates to
+provider ..> registry : scoped binding
+
+' Persistence sits on Support and fulfils the contract.
+interacts ..> seo : morphOne
+interacts ..|> hasseo : implements
+seo ..> seodata : toSeoData()
+
+' Host application wiring.
+model ..> interacts : use
+model ..|> hasseo : implements
+panel ..> plugin : plugins([...])
+page ..> haseometa : use
+
+@enduml

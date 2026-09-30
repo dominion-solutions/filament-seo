@@ -1,0 +1,65 @@
+name: Code style
+
+# Applies Pint and commits the result, so a contributor does not have to install
+# PHP locally to find out their formatting is wrong.
+#
+# This workflow deliberately never touches the default branch: `main` is
+# protected, and a bot pushing to it would be blocked at best and would bypass
+# the branch's review rules at worst. Fixes are applied only to feature-branch
+# pushes. If the branch backs a PR, the formatting commit becomes a reviewable
+# change in that PR.
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fix:
+    name: Pint
+    # The guard that keeps this off the protected default branch. It is
+    # deliberately evaluated on the job, not just the trigger.
+    if: github.ref_name != github.event.repository.default_branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, curl, libxml, mbstring
+          coverage: none
+          tools: composer:v2
+
+      - name: Install Pint
+        run: composer global require 'laravel/pint:^1.24' --no-interaction --quiet
+
+      - name: Apply formatting
+        run: pint
+
+      - name: Commit any changes
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        run: |
+          if git diff --quiet; then
+            echo "Nothing to fix."
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Apply Pint code style'
+          git push origin "HEAD:refs/heads/$BRANCH_NAME"

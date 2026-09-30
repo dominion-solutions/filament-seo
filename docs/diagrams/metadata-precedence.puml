@@ -1,0 +1,54 @@
+@startuml
+' Which value wins when more than one source could supply the same field.
+'
+' The rule is "most specific first", applied by layering the page's values on
+' top of a base built from the panel and the environment. Nothing is ever
+' overwritten with a less specific value.
+
+title Metadata resolution order
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam activity {
+  BackgroundColor #ffffff
+  BorderColor #475569
+  DiamondBackgroundColor #f8fafc
+}
+
+start
+
+:resolveSeoData();
+
+if (Did the page publish a SeoData?) then (yes)
+    :Use the page's SeoData.;
+else (no)
+    if (Is panel-level seoData() configured?) then (yes)
+        :Use the panel's SeoData.;
+    else (no)
+        :Start from an empty SeoData.;
+    endif
+endif
+
+if (Is site_name configured?) then (yes)
+    :Layer in the configured site name.;
+else (no)
+    :Layer in the application name.;
+endif
+
+if (Is canonical_fallback enabled?) then (yes)
+    :Layer in the current request URL.;
+else (no)
+    :Leave the canonical URL empty.;
+endif
+
+stop
+
+note right
+  __Layered underneath__ means each of
+  these is only used when nothing
+  more specific supplied a value,
+  so a page that names its own site
+  or canonical keeps it.
+end note
+
+@enduml

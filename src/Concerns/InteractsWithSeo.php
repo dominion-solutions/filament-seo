@@ -2,6 +2,7 @@
 
 namespace DominionSolutions\FilamentSeo\Concerns;
 
+use DominionSolutions\FilamentSeo\Contracts\HasSeo;
 use DominionSolutions\FilamentSeo\Models\Seo;
 use DominionSolutions\FilamentSeo\Support\SeoData;
 use DominionSolutions\FilamentSeo\Support\Text;
@@ -16,10 +17,29 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * fallbacks only fill the gaps. A record therefore has usable metadata the
  * moment it is created, and improves as soon as someone fills in the form.
  *
+ * A model using this trait must also implement {@see HasSeo}, which is the
+ * contract the trait implements:
+ *
+ *     class Product extends Model implements HasSeo
+ *     {
+ *         use InteractsWithSeo;
+ *     }
+ *
  * @phpstan-require-extends Model
+ *
+ * @phpstan-require-implements HasSeo
  */
 trait InteractsWithSeo
 {
+    /**
+     * The related metadata row.
+     *
+     * The `Seo` type argument is declared rather than inferred so static
+     * analysis knows `first()` returns a `Seo` and `updateOrCreate()` returns
+     * one, even though the model class is resolved from config at runtime.
+     *
+     * @return MorphOne<Seo, $this>
+     */
     public function seo(): MorphOne
     {
         /** @var class-string<Seo> $model */
@@ -83,15 +103,32 @@ trait InteractsWithSeo
      */
     public function saveSeo(array $attributes): Seo
     {
-        return $this->seo()->updateOrCreate([], [
-            'title' => $attributes['title'] ?? null,
-            'description' => $attributes['description'] ?? null,
-            'image_url' => $attributes['image_url'] ?? null,
-            'image_alt' => $attributes['image_alt'] ?? null,
-            'canonical_url' => $attributes['canonical_url'] ?? null,
-            'robots' => filled($attributes['robots'] ?? null) ? $attributes['robots'] : SeoData::ROBOTS_INDEX_FOLLOW,
-            'type' => filled($attributes['type'] ?? null) ? $attributes['type'] : SeoData::TYPE_WEBSITE,
-        ]);
+        $record = $this->seo()->firstOrNew();
+
+        if (! $record->exists) {
+            $record->robots = SeoData::ROBOTS_INDEX_FOLLOW;
+            $record->type = SeoData::TYPE_WEBSITE;
+        }
+
+        $record->fill(array_intersect_key($attributes, array_flip([
+            'title',
+            'description',
+            'image_url',
+            'image_alt',
+            'canonical_url',
+        ])));
+
+        if (array_key_exists('robots', $attributes)) {
+            $record->robots = filled($attributes['robots']) ? $attributes['robots'] : SeoData::ROBOTS_INDEX_FOLLOW;
+        }
+
+        if (array_key_exists('type', $attributes)) {
+            $record->type = filled($attributes['type']) ? $attributes['type'] : SeoData::TYPE_WEBSITE;
+        }
+
+        $record->save();
+
+        return $record;
     }
 
     /**

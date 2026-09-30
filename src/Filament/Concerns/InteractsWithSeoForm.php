@@ -3,6 +3,7 @@
 namespace DominionSolutions\FilamentSeo\Filament\Concerns;
 
 use DominionSolutions\FilamentSeo\Concerns\InteractsWithSeo;
+use DominionSolutions\FilamentSeo\Contracts\HasSeo;
 use DominionSolutions\FilamentSeo\Schemas\SeoSchema;
 use DominionSolutions\FilamentSeo\Support\SeoData;
 use Illuminate\Database\Eloquent\Model;
@@ -40,7 +41,7 @@ trait InteractsWithSeoForm
 
         $this->ensureRecordInteractsWithSeo($record);
 
-        $seo = method_exists($record, 'getSeoRecord') ? $record->getSeoRecord() : null;
+        $seo = $record->getSeoRecord();
 
         return [
             ...$data,
@@ -50,8 +51,12 @@ trait InteractsWithSeoForm
                 'image_url' => $seo?->image_url,
                 'image_alt' => $seo?->image_alt,
                 'canonical_url' => $seo?->canonical_url,
-                'robots' => $seo?->robots ?? SeoData::ROBOTS_INDEX_FOLLOW,
-                'type' => $seo?->type ?? SeoData::TYPE_WEBSITE,
+                // `robots` and `type` are non-nullable columns, so `??` here
+                // only ever covers a record that has no row yet. The operator
+                // suppresses the error for the whole left-hand chain, so the
+                // nullsafe `?->` would be redundant.
+                'robots' => $seo->robots ?? SeoData::ROBOTS_INDEX_FOLLOW,
+                'type' => $seo->type ?? SeoData::TYPE_WEBSITE,
             ],
         ];
     }
@@ -79,6 +84,15 @@ trait InteractsWithSeoForm
         return $data;
     }
 
+    /**
+     * Fail loudly when the model cannot carry SEO metadata.
+     *
+     * Declared as an unconditional assertion so static analysis treats the
+     * record as a model implementing {@see HasSeo} from here on — which is
+     * exactly what the guard enforces at runtime.
+     *
+     * @phpstan-assert Model&HasSeo $record
+     */
     private function ensureRecordInteractsWithSeo(Model $record): void
     {
         if (in_array(InteractsWithSeo::class, class_uses_recursive($record), true)) {
